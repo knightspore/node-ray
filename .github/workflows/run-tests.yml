@@ -13,11 +13,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node-version: [22, 24]
+        node-version: [20, 22, 24]
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
 
@@ -29,7 +29,8 @@ jobs:
       run: bun install
 
     - name: Run the tests with coverage
-      run: bun test --coverage-junit --coverage
+      run: |
+        bun test --coverage-junit --coverage --reporter-outfile=coverage.xml --reporter=junit
 
     - name: Upload failed test results to Codecov
       if: ${{ !cancelled() }}
@@ -38,6 +39,9 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage.xml
+        report_type: coverage
+        disable_telem: true
